@@ -832,10 +832,23 @@ class ActiveResource(object):
                 self.klass.headers)
 
     def get_id(self):
-        return self.attributes.get(self.klass.primary_key)
+        if isinstance(self.klass.primary_key, list):
+            composite_key = [str(self.attributes.get(part)) for part in self.klass.primary_key]
+            return '|'.join(composite_key)
+        else:
+            return self.attributes.get(self.klass.primary_key)
 
-    def set_id(self, value):
-        self.attributes[self.klass.primary_key] = value
+    def set_id(self, value = None, **params):
+        if (len(value.split("|")) > 1 and isinstance(self.klass.primary_key, list)) or (isinstance(self.klass.primary_key, list) and isinstance(value, list) and len(self.klass.primary_key) == len(value)):
+            values = value.split("|")
+
+            for i in range(len(self.klass.primary_key)):
+                self.attributes[self.klass.primary_key[i]] = values[i]
+        elif isinstance(self.klass.primary_key, list) and len(params) == len(self.klass.primary_key):
+            for i in range(len(self.klass.primary_key)):
+                self.attributes[self.klass.primary_key[i]] = params.get(self.klass.primary_key[i])
+        else:
+            self.attributes[self.klass.primary_key] = value
 
     id = property(get_id, set_id, None, 'Value stored in the primary key')
 
