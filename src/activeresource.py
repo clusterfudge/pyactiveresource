@@ -839,8 +839,11 @@ class ActiveResource(object):
             return self.attributes.get(self.klass.primary_key)
 
     def set_id(self, value = None, **params):
-        if (len(value.split("|")) > 1 and isinstance(self.klass.primary_key, list)) or (isinstance(self.klass.primary_key, list) and isinstance(value, list) and len(self.klass.primary_key) == len(value)):
-            values = value.split("|")
+        if (isinstance(value, str) and len(value.split("|")) > 1 and isinstance(self.klass.primary_key, list)) or (isinstance(self.klass.primary_key, list) and isinstance(value, list) and len(self.klass.primary_key) == len(value)):
+            if(isinstance(value, str)):
+                values = value.split("|")
+            else:
+                values = value
 
             for i in range(len(self.klass.primary_key)):
                 self.attributes[self.klass.primary_key[i]] = values[i]
